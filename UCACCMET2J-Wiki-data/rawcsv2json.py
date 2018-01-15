@@ -41,24 +41,55 @@ def process_csv(file, header):
         fd.close()
     return out
 
+
+
 if __name__ == "__main__":
-    p =argparse.ArgumentParser()
-    p.add_argument("raw", nargs="*", default=["-"])
-    p.add_argument("--header", type=str, default="h.txt")
-    p.add_argument("--debug", action="store_true")
-    args = p.parse_args()
-    if args.debug:
-        logging.basicConfig(level=logging.INFO)
     header = read_header(args.header)
     out = []
+    year_min = 1830
+    year_max = 1870
+    key = 'award_label'
+    out_award = []
+    
+    for year in range(year_min, year_max):
 
+        count = 0
+        for file in ["years\\" + str(year)]: #,"years\\1941","years\\1845"]: #args.raw:
+            out += process_csv(file, header)
+ 
+#            
+#            if (key in out[count]) == True:
+#                if ("Nobel Prize" in out[count][key]) == True:
+#                    out_award += [out[count]]
+#             
+#            count += 1
 
-    for file in ["years\\2000"]: #args.raw:
-        out += process_csv(file, header)
-    with open('theyears.json', 'w') as file:
-        json.dump(out, file, indent=4)
-    #print(json.dumps(out, indent=4, ensure_ascii=True))
-    #json.dumps(out, indent=4, ensure_ascii=True)
+        
+        for person in range(len(out)):
+            if (key in out[person]) == True:
+                if ("Nobel Prize" in out[person][key]) == True:
+                    out_award += [out[person]]    
+
+            
+
+#        with open('theyears.json', 'w') as file:
+#            json.dump(out, file, indent=4)
+                #print(json.dumps(out, indent=4, ensure_ascii=True))
+                #json.dumps(out, indent=4, ensure_ascii=True)
+
+    
+workwith = out[1]
+
+#key = 'award_label'
+#out_award = []
+#
+for person in range(len(out)):
+    if (key in out[person]) == True:
+        if ("Nobel Prize" in out[person][key]) == True:
+            out_award += [out[person]]
+#        
+print(out_award)
+    
     
     
     
