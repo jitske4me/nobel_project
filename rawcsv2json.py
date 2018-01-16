@@ -48,11 +48,18 @@ year_min = 1830
 year_max = 2000
 
 ## Specify key & value to select on
-key = "award_label"
+key1 = "award_label"
 search_term1 = "nobel"
+exclude_term1 = "ig nobel prize"
+award_list1 = []
+
+key2 = "22-rdf-syntax-ns#type_label"
+search_term2 = "nobellaureate"
+award_list2 = []
 
 ## List with only Nobel Prize winners
-out_Nobel = []
+out_Nobel1 = []
+out_Nobel2 = []
 
 ## Go through a range of years specified before 
 for year in range(year_min, year_max):
@@ -65,63 +72,155 @@ for year in range(year_min, year_max):
         
         ## If the person has an awardlabel, check if it has "Nobel Prize" in it 
         ##(if the value was NULL, the formula before has removed it)
-        if key in person:
-            if "nobel prize" in person[key].lower():
+        if key1 in person:
+            if search_term1 in person[key1].lower():
+                if exclude_term1 not in person[key1].lower():
                 
-                ## Add to a new list 
-                out_Nobel.append(person)
-                
+                    ## Add to a new list 
+                    out_Nobel1.append(person)
+                    award_list1.append(person[key1])
+#                
+#        if key2 in person:
+#            if search_term2 in person[key2].lower():
+#                
+#                ## Add to a new list 
+#                out_Nobel2.append(person)
+##            if search_
+##                award_list2.append(person[key1])
+            
                 
 #491 "Nobel Prize"
 #579 "nobel"
-#2510 "nobel" and "prize"
-
+#569 "nobel" but not "ig nobel prize"
+#2510 "nobel" and "prize" 
+#all(x in descr2 for x in ['Nobel', 'Prize'])
+                
 
 #with open('NobelPrize1830-2000.v2.json', 'w') as file:
-#    json.dump(out_Nobel, file, indent=4)
-#                      
+#    json.dump(out_Nobel1, file, indent=4)            
     
 desired_keys = [
-                'award_label',
-                'award',
-                'birthDate',
                 'birthName',
-                'birthPlace_label',
+                'rdf-schema#label',
+                'award_label',
+                #'award',
+                'birthDate',
                 'birthYear',
-                'citizenship_label',
-                'country',
+                'birthPlace_label',
                 'deathDate',
                 'deathPlace_label',
-                'discipline_label',
-                'ethnicity_label',
-                'gender_label',
-                'instution_label',
+                'citizenship_label',
+                #'country',
+                #'ethnicity_label',
                 'nationality_label',
-                'profession_label',
-                'university_label'
+                #'gender_label',
+                #'discipline_label',
+                #'instution_label',
+                #'profession_label',
+                #'university_label',
+                'almaMater_label',
+                'field_label',
+                '22-rdf-syntax-ns#type_label',
+                'nobel_prize'
                 ]
 
-        
+ 
+prize_names = [
+               "Nobel Memorial Prize in Economic Sciences", 
+               "Nobel Prize in Chemistry", 
+               "Nobel Prize in Physics",
+               "Nobel Peace Prize",
+               "Nobel Prize in Physiology or Medicine",
+               "Nobel Prize in Literature"
+               ]
+
+not_prize_names = ["Ig Nobel Prize"]
+
 ## Open the output CSV file we want to write to
-with open('NobelPrize1830-2000.csv', 'w', newline='',encoding='utf-8') as file:
+with open('NobelPrize1830-2000-NULL-v2.csv', 'w', newline='',encoding='utf-8') as file:
     csvwriter = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     csvwriter.writerow(desired_keys)
     
-    for dictionaries in out_Nobel:
+    for dictionaries in out_Nobel1:
         tmp = []
         
+        ## Add the value belonging to the key that we want to our tmp list,
+        ## if there's no value: "NULL"
         for entry in desired_keys:
             if entry in dictionaries:
                 tmp.append(dictionaries[entry])
+            elif entry == 'nobel_prize':
+                pass
             else:
-                tmp.append(None)
-    
+                tmp.append("NULL")
+        
+        won_prize = False    
+        for prize in prize_names:
+            
+            if prize in dictionaries[key1]:
+                tmp.append(prize)
+                won_prize = True
+                
+        if won_prize == False:
+            tmp.append("NULL")
+            
+            
         csvwriter.writerow(tmp)
     
     
 
                 #print(json.dumps(out, indent=4, ensure_ascii=True))
                 #json.dumps(out, indent=4, ensure_ascii=True)
+
+## Check if all are Nobel Prize
+prize_names = [
+               "Nobel Memorial Prize in Economic Sciences", 
+               "Nobel Prize in Chemistry", 
+               "Nobel Prize in Physics",
+               "Nobel Peace Prize",
+               "Nobel Prize in Physiology or Medicine",
+               "Nobel Prize in Literature"
+               ]
+
+not_prize_names = ["Ig Nobel Prize"]
+
+#
+#check_if_nobel_prize1 = []
+#check_if_nobel_prize2 = []
+#
+#for entry in award_list1:
+#    
+#    count = 0
+#    
+#    
+#    for prize in range(len(prize_names)):
+#        if prize_names[prize] in entry:
+#            count += 1
+#    if count == 0:
+#        check_if_nobel_prize1.append(entry)
+#        
+#print(check_if_nobel_prize1)
+   
+
+
+
+
+
+
+
+
+ 
+#for entry in award_list2:
+#    
+#    count = 0
+#    for prize in range(len(prize_names)):
+#        if prize_names[prize] in entry:
+#            count += 1
+#    if count == 0:
+#        check_if_nobel_prize2.append(entry)
+#            
+
+
 
     
     
