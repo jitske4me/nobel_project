@@ -1,0 +1,17 @@
+for person names:
+
+rdf-schema#label
+commonName
+
+for universities.. hard to say why they're not there... maybe:
+
+college_label
+college
+
+for gender (we tried the 'gender_label' which is empty, try this:
+
+gender
+
+citizenship, nationality and country are not filled in entirely... try:
+stateOfOrigin_label
+stateOfOrigin
