@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 17 11:55:09 2018
+
+@author: leacaterinacorsetti
+"""
+
+#to change a header in a csv file for a column
+import csv
+import os
+
+inputFileName = "processed_countries_1.csv" #file you wanna open
+outputFileName = os.path.splitext(inputFileName)[0] + "processedcountries1_modified.csv" 
+#technically be the output file
+
+outcontent = []
+
+with open(inputFileName, 'r') as infile:
+    r = csv.reader(infile)
+    for row in r:
+        outcontent.append(row)
+
+outcontent[0] = ['name', 'capital', 'nationality_label', 'lat', 'lon'] #headers you want in the new file
+
+with open(outputFileName, 'w') as outfile: #write the new file with relevant info
+    w = csv.writer(outfile)
+    for row in outcontent:
+        w.writerow(row)
