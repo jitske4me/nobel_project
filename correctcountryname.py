@@ -25,7 +25,7 @@ for i in range(len(pycountry.countries)):
 list(pycountry.countries)[0].name
 
 # incoming countries is a list of all country names encountered in succession by your script
-incomingcountries = []
+#incomingcountries = []
 
 # countrydict links all incorrectly spelled country names to correct spellings
 # countrydict = {} # should be loaded in from file at start
@@ -40,11 +40,11 @@ if os.path.exists('countrydictionary.dict'):
 
 selection_nationality = 'nationality_label'
 
-with open('NobelPrize1830-2000.json') as my_file:
-    data = json.load(my_file)
-    for entry in data:
-        if selection_nationality in entry:
-            incomingcountries.append(entry[selection_nationality]) 
+#with open('NobelPrize1830-2000.json') as my_file:
+#    data = json.load(my_file)
+#    for entry in data:
+#        if selection_nationality in entry:
+#            incomingcountries.append(entry[selection_nationality]) 
 #print(incomingcountries)
 
 def correctname(incountry):
@@ -64,5 +64,6 @@ def correctname(incountry):
 #    print(correctname(item))    
 
 # Save dictionary to file        
-with open('countrydictionary.dict', 'w') as dictfile:
-    dictfile.write(str(countrydict))
+def savedict():
+    with open('countrydictionary.dict', 'w') as dictfile:
+        dictfile.write(str(countrydict))
