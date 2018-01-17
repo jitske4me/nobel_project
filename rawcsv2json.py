@@ -9,6 +9,7 @@
 ## - numbers are interpreted as numbers, not strings
 
 import json, logging, csv, re, sys, codecs
+from correctcountryname import correctname
 
 floatre = re.compile("^\d+\.\d+$")
 intre = re.compile("^\d+$")
@@ -44,8 +45,8 @@ def process_csv(file, header):
 out = []
 
 ## Specify year range 
-year_min = 1890
-year_max = 1900
+year_min = 1840
+year_max = 2000
 
 ## Specify key & value to select on
 key1 = "award_label"
@@ -126,7 +127,8 @@ desired_keys = [
                 'almaMater_label',
                 'field_label',
                 '22-rdf-syntax-ns#type_label',
-                'nobel_prize'
+                'nobel_prize',
+                'corrected_nationality'
                 ]
 
  
@@ -142,7 +144,7 @@ prize_names = [
 not_prize_names = ["Ig Nobel Prize"]
 
 ## Open the output CSV file we want to write to
-with open('NobelPrize1830-2000-NULL-v3.csv', 'w', newline='',encoding='utf-8') as file:
+with open('NobelPrize1830-2000-nationality_v1.csv', 'w', newline='',encoding='utf-8') as file:
     csvwriter = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     csvwriter.writerow(desired_keys)
     
@@ -155,9 +157,13 @@ with open('NobelPrize1830-2000-NULL-v3.csv', 'w', newline='',encoding='utf-8') a
             
             won_prize = False
             
+            
+            
             ## If the column-name is in the dictionary, append the value
             if entry in person_dictionary:
-                tmp.append(person_dictionary[entry])
+                if entry == 'nationality_label':
+                    tmp.append(correctname(person_dictionary[entry]))
+                else: tmp.append(person_dictionary[entry])
             
             ## When we get to the column-name nobel_prize, add Nobel Prize Name
             elif entry == 'nobel_prize':
@@ -170,7 +176,10 @@ with open('NobelPrize1830-2000-NULL-v3.csv', 'w', newline='',encoding='utf-8') a
                         
                 ## If there is no prize identified, make it "NULL"
                 if not won_prize:
-                    tmp.append("NULL")         
+                    tmp.append("NULL")
+            
+#            if entry == 'corrected_nationality':
+                
             
             ## If there is no info available, write "NULL"
             else:
@@ -232,7 +241,7 @@ print(check_if_nobel_prize2)
 
 with open('checkout.json', 'w') as file:
     json.dump(award_list2, file, indent=4)            
-    
+
 
 
     
