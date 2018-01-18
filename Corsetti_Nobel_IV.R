@@ -1,3 +1,5 @@
+#creating a histogram of nobel laureate birth years
+
 library('tidyverse')
 #install.packages('data.table')
 library('data.table')
@@ -24,8 +26,3 @@ hist(Nobel$birthYear, #x value
      main = "Histogram of Laureate's birth years", #plot title
      ylim = c(0, 20))
 
-#mytempdata = merge('country', 'Nobel')
-
-#country(df)[which(country(df)=='denonym')] <-'nationality_label'
-#require(dbplyr)
-#df=rename(df, nationality_label = denomyn)
