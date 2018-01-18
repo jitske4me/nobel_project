@@ -25,7 +25,7 @@ for i in range(len(pycountry.countries)):
 
 # If the file countrydictionary.dict exsists, load it in, otherwise start with an empry dictionary 
 if os.path.exists('countrydictionary.dict'):
-    print("Country dictionary loaded\n")
+    print("Country dictionary loaded\n")    # Print this to know that this step went well
     with open('countrydictionary.dict', 'r+') as dictfile:
         countrydict = ast.literal_eval(dictfile.readlines()[0])
 else: countrydict = {}  
