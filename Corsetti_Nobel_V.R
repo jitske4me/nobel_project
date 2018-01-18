@@ -1,3 +1,6 @@
+#code written by Lucie after I asked for help and we kept bumping into walls
+#only on here for reference as the data was finally made in python with Teun's help
+
 library('tidyverse')
 library('data.table')
 
