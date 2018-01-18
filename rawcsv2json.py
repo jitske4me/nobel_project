@@ -8,9 +8,19 @@
 ## - "NULL" entries are simply left out
 ## - numbers are interpreted as numbers, not strings
 
+
+#####
+
+# Script was modified by Jitske Aya Lucretia Koeleman (a.k.a. Jazzy Jitske)
+
+# Now the script loops through a specified number of years
+# Selects nobel prize laureates through two different ways
+# Then writes info to a csv file
+# - with only the columns necessary
+# - and adds another column coding for which Nobel Prize was won 
+
 import json, logging, csv, re, sys, codecs
 from correctcountryname import correctname, savedict
-
 
 floatre = re.compile("^\d+\.\d+$")
 intre = re.compile("^\d+$")
