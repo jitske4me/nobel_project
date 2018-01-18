@@ -20,8 +20,9 @@ import csv
 
 ## Open a file which has ['name', 'nationality_label', 'prize', 'lat', 'lon']
 ## For only the laureates that have a nationality label
-with open("nobel_coordinates_1.csv", encoding = 'utf-8') as file:
+with open("nobel_coordinates_3.csv", encoding = 'utf-8') as file:
     nobels = list(csv.reader(file))
+
 
 ## Create empty list, which will eventually contain the final output file
 output_with_country_and_freq = []
@@ -36,7 +37,7 @@ for person in range(1, len(nobels)):
     
     unique_nationalities.add(nobels[person][1])
 
- 
+
 ## Calculates the nationality frequency for each country
 for entry in range(1, len(nobels)):
    
@@ -57,5 +58,3 @@ total_nat = 0
 for line in range(len(output_with_country_and_freq)):
     total_nat += output_with_country_and_freq[line][1]
         
-
-
