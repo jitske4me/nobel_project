@@ -1,4 +1,4 @@
-#drawing the final graphs which includes frequency
+#drawing the final graphs which includes frequency of nobel laureates in the size of the dot
 
 library('tidyverse')
 library('data.table')
