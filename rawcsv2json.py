@@ -9,7 +9,8 @@
 ## - numbers are interpreted as numbers, not strings
 
 import json, logging, csv, re, sys, codecs
-from correctcountryname import correctname
+from correctcountryname import correctname, savedict
+
 
 floatre = re.compile("^\d+\.\d+$")
 intre = re.compile("^\d+$")
@@ -20,6 +21,7 @@ for line in open(file):
     header.append(line.strip())
 logging.info("%d lines in header", len(header))
 
+## Function provided by David
 def process_csv(file, header):
     out=[]
     stdin = file == "-"
@@ -41,11 +43,8 @@ def process_csv(file, header):
         fd.close()
     return out
 
-
-out = []
-
 ## Specify year range 
-year_min = 1840
+year_min = 1810
 year_max = 2000
 
 ## Specify key & value to select on
@@ -53,15 +52,18 @@ key1 = "award_label"
 search_term1 = "nobel"
 exclude_term1 = "ig nobel prize"
 award_list1 = []
+label_info1 = []
 
 ## Select another key & value to select on
 key2 = "22-rdf-syntax-ns#type_label"
 search_term2 = "nobellaureate"
 award_list2 = []
+label_info2 = []
 
 ## List with only Nobel Prize winners
-out_Nobel1 = []
-out_Nobel2 = []
+output_Nobel_Winners1 = []
+output_Nobel_Winners2 = []
+output_Nobel_Winners_both = []
 
 ## Go through a range of years specified before 
 for year in range(year_min, year_max):
@@ -74,26 +76,42 @@ for year in range(year_min, year_max):
         
         ## If the person has an awardlabel, check if it has "Nobel Prize" in it 
         ##(if the value was NULL, the formula before has removed it)
+        
+        won_Nobel = False
         if key1 in person:
             if search_term1 in person[key1].lower():
                 if exclude_term1 not in person[key1].lower():
                 
-                    ## Add to a new list 
-                    out_Nobel1.append(person)
-                    ## Make a list that has the awards won by every person selected
+                    ## Add to a list with the Nobel Winners
+                    output_Nobel_Winners1.append(person)
+                    output_Nobel_Winners_both.append(person)
+                    ## Make a list that has the awards won by every person selected, to check later
                     award_list1.append(person[key1])
+                    label_info1+=[[person[key2],person['rdf-schema#label']]]
+                    won_Nobel = True
         
-        ## Try using a new search term        
+        ## The same as above, but for a new search_term     
         if key2 in person:
             if search_term2 in person[key2].lower():
                 
                 ## Add to a new list 
-                out_Nobel2.append(person)
+                output_Nobel_Winners2.append(person)
+                label_info2+=[[person[key2],person['rdf-schema#label']]]
+                if not won_Nobel:
+                    output_Nobel_Winners_both.append(person)
+                               
+                               
                 ## Add award label
                 if key1 in person:
                     award_list2.append(person[key1])
+        
+#        if "Hans Bethe" in person['rdf-schema#label']:
+#            POI_info = []
+#            POI_info += [person]
+#            print(POI_info)
+        
             
-                
+### Number of persons returned for certain key terms                
 #491 "Nobel Prize"
 #579 "nobel"
 #569 "nobel" but not "ig nobel prize"
@@ -102,7 +120,7 @@ for year in range(year_min, year_max):
                 
 
 #with open('NobelPrize1830-2000.v2.json', 'w') as file:
-#    json.dump(out_Nobel1, file, indent=4)            
+#    json.dump(output_Nobel_Winners1, file, indent=4)            
     
 desired_keys = [
                 'birthName',
@@ -127,10 +145,8 @@ desired_keys = [
                 'almaMater_label',
                 'field_label',
                 '22-rdf-syntax-ns#type_label',
-                'nobel_prize',
-                'corrected_nationality'
+                'nobel_prize'
                 ]
-
  
 prize_names = [
                "Nobel Memorial Prize in Economic Sciences", 
@@ -141,14 +157,25 @@ prize_names = [
                "Nobel Prize in Literature"
                ]
 
+nobel_22ref_label_names = [
+                           "NobelLaureatesInEconomics",
+                           "NobelLaureatesInChemistry",
+                           "NobelLaureatesInPhysics",
+                           "NobelPeacePrizeLaureates",
+                           "NobelLaureatesInPhysiologyOrMedicine",
+                           "NobelLaureatesInLiterature"                           
+                           ]
+
 not_prize_names = ["Ig Nobel Prize"]
 
+
+
 ## Open the output CSV file we want to write to
-with open('NobelPrize1830-2000-nationality_v1.csv', 'w', newline='',encoding='utf-8') as file:
+with open('NobelPrize1830-2000-NULL-v4.csv', 'w', newline='',encoding='utf-8') as file:
     csvwriter = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     csvwriter.writerow(desired_keys)
     
-    for person_dictionary in out_Nobel1:
+    for person_dictionary in output_Nobel_Winners_both:
         tmp = []
         
         ## Add the value belonging to the key that we want to our tmp list,
@@ -157,54 +184,67 @@ with open('NobelPrize1830-2000-nationality_v1.csv', 'w', newline='',encoding='ut
             
             won_prize = False
             
-            
-            
             ## If the column-name is in the dictionary, append the value
             if entry in person_dictionary:
                 if entry == 'nationality_label':
                     tmp.append(correctname(person_dictionary[entry]))
                 else: tmp.append(person_dictionary[entry])
+                    
+
             
             ## When we get to the column-name nobel_prize, add Nobel Prize Name
-            elif entry == 'nobel_prize':
-                for prize in prize_names:
+            elif entry == 'nobel_prize': # and key1 in person_dictionary:
+                
+                ## Look at the award_label column
+                if key1 in person_dictionary:
                     
-                    ## Append the prize name
-                    if not won_prize and prize in person_dictionary[key1]:
-                        tmp.append(prize)
+                    
+                    ## There are a couple coded "{Nobel Prize|Physiology}" 
+                    if not won_prize and "{Nobel Prize|Physiology}" in person_dictionary[key1]:
+                        tmp.append("Nobel Prize in Physiology or Medicine")
                         won_prize = True
                         
+                    ## Check which prize name is in there    
+                    for prize in prize_names:
+                        
+                        ## Append the prize name
+                        if not won_prize and prize in person_dictionary[key1]:
+                            tmp.append(prize)
+                            won_prize = True
+                            
+                ## Look at the "22-rdf-syntax-ns#type_label" column, if the last column is still empty
+                if key2 in person_dictionary and tmp[-1] not in prize_names:
+                    
+                    
+                    for label in range(len(nobel_22ref_label_names)): 
+                        
+                        ## Check if the labels are in the "22-rdf-syntax-ns#type_label"
+                        ## and then assign the corresponding prize name to the nobel_prize column
+                        if not won_prize and nobel_22ref_label_names[label] in person_dictionary[key2]:
+                            tmp.append(prize_names[label])
+                            won_prize = True
+                            
                 ## If there is no prize identified, make it "NULL"
                 if not won_prize:
                     tmp.append("NULL")
-            
-#            if entry == 'corrected_nationality':
-                
+                            
             
             ## If there is no info available, write "NULL"
             else:
-                tmp.append("NULL")
-        
+                tmp.append("NULL")       
             
         csvwriter.writerow(tmp)
     
-    
+## Save the dictionary of countries that have been inputted into the correctname function    
+savedict()
 
                 #print(json.dumps(out, indent=4, ensure_ascii=True))
                 #json.dumps(out, indent=4, ensure_ascii=True)
 
-## Check if all are Nobel Prize
-prize_names = [
-               "Nobel Memorial Prize in Economic Sciences", 
-               "Nobel Prize in Chemistry", 
-               "Nobel Prize in Physics",
-               "Nobel Peace Prize",
-               "Nobel Prize in Physiology or Medicine",
-               "Nobel Prize in Literature"
-               ]
 
-not_prize_names = ["Ig Nobel Prize"]
-
+### The code below checks if the above Nobel Prizes are in the award labels 
+### and else prints something else in there
+### This is not essential to write the dataset
 
 check_if_nobel_prize1 = []
 check_if_nobel_prize2 = []
@@ -223,8 +263,6 @@ for entry in award_list1:
 print(check_if_nobel_prize1)
    
 
-
-
  
 for entry in award_list2:
     
@@ -235,14 +273,29 @@ for entry in award_list2:
     if count == 0:
         check_if_nobel_prize2.append(entry)
             
-
 print(check_if_nobel_prize2)
 
 
+## Code below checks if something is in the new way of doing it 
+not_in_outNobel1 = []
+not_in_Nobel1_names = []
+for label2 in range(len(label_info2)):
+    duplicate = False
+    for label1 in range(len(label_info1)):
+        if label_info1[label1][0] == label_info2[label2][0]:
+            duplicate = True 
+    
+    if not duplicate:
+        not_in_outNobel1.append(label_info2[label2])
+        not_in_Nobel1_names.append(label_info2[label2][1])
+        
+        
+print(not_in_Nobel1_names)
+
+
+
 with open('checkout.json', 'w') as file:
-    json.dump(award_list2, file, indent=4)            
-
-
-
+    json.dump(not_in_outNobel1, file, indent=4)          
     
-    
+#with open('POI.json', 'w') as file:
+#    json.dump(POI_info, file, indent=4)       
