@@ -1,4 +1,5 @@
 #creating a histogram of nobel laureate birth years
+#code for final graph attached at the bottom of this file:
 
 library('tidyverse')
 #install.packages('data.table')
@@ -26,3 +27,17 @@ hist(Nobel$birthYear, #x value
      main = "Histogram of Laureate's birth years", #plot title
      ylim = c(0, 20))
 
+library('tidyverse')
+library('data.table')
+Nobel <- read.csv('nobel_coordinates.csv')
+install.packages("maptools")
+frequency <- read.csv("country_and_frequency.csv")
+library(ggthemes)
+library(ggmap)
+library(maps)
+library(mapdata)
+
+#plotting correct final version of map with correct data set
+ggplot(data=frequency) + theme_tufte() +
+  geom_polygon(data = map_data('world'), mapping = aes(x = long, y = lat, group=group), fill='grey', colour='white') +
+  geom_point(data=frequency, mapping = aes(x=lon, y=lat, size= nationality_freq, colour= nationality_label), alpha = 0.9)
