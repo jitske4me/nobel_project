@@ -266,7 +266,6 @@ for entry in award_list1:
     
     count = 0
     
-    
     for prize in range(len(prize_names)):
         if prize_names[prize] in entry:
             count += 1
@@ -274,8 +273,6 @@ for entry in award_list1:
         check_if_nobel_prize1.append(entry)
         
 #print(check_if_nobel_prize1)
-   
-
  
 for entry in award_list2:
     
@@ -287,7 +284,6 @@ for entry in award_list2:
         check_if_nobel_prize2.append(entry)
             
 #print(check_if_nobel_prize2)
-
 
 ## Code below checks which new persons are added by using search_term2 (vs search_term1)
 ## to see if it outputted Nobel Laureautes and to see the info that belongs to them
@@ -301,11 +297,9 @@ for label2 in range(len(label_info2)):
     
     if not duplicate:
         not_in_outNobel1.append(label_info2[label2])
-        not_in_Nobel1_names.append(label_info2[label2][1])
-        
+        not_in_Nobel1_names.append(label_info2[label2][1])        
         
 #print(not_in_Nobel1_names)
-
 
 with open('checkout.json', 'w') as file:
     json.dump(not_in_outNobel1, file, indent=4)          
