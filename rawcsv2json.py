@@ -11,16 +11,27 @@
 
 #####
 
-# Script was modified by Jitske Aya Lucretia Koeleman (a.k.a. Jazzy Jitske)
+# Script modified and extended by Jitske Aya Lucretia Koeleman (a.k.a. Jazzy Jitske)
+## Modification: David's code worked from commandline, it was edited to work in Spyder 
+## Extension: Everything described below
 
-# Now the script loops through a specified number of years
-# Selects nobel prize laureates through two different ways
-# Then writes info to a csv file
-# - with only the columns necessary
-# - and adds another column coding for which Nobel Prize was won 
+# Goal
+## Select Nobel Prize Winners from PoW database 
+## Write only the necessary info to csv file 
 
-import json, logging, csv, re, sys, codecs
+#Functioning
+## The script loops through a specified number of years
+## Selects nobel prize laureates through two different ways
+## Then writes info to a csv file
+## - with only the columns necessary
+## - and adds another column coding for which Nobel Prize was won 
+## The last part of the script checks some things 
+
+##############################################################################
+
+## input = any country name, corrects it to be in line with the pycountry package
 from correctcountryname import correctname, savedict
+import json, logging, csv, re, sys, codecs
 
 floatre = re.compile("^\d+\.\d+$")
 intre = re.compile("^\d+$")
@@ -61,13 +72,17 @@ year_max = 2000
 key1 = "award_label"
 search_term1 = "nobel"
 exclude_term1 = "ig nobel prize"
-award_list1 = []
-label_info1 = []
 
 ## Select another key & value to select on
 key2 = "22-rdf-syntax-ns#type_label"
 search_term2 = "nobellaureate"
+
+## Lists to check the award_label later on
+award_list1 = []
 award_list2 = []
+
+## Lists to check the 22-rdf-syntax-ns#type_label later on
+label_info1 = []
 label_info2 = []
 
 ## List with only Nobel Prize winners
@@ -95,9 +110,11 @@ for year in range(year_min, year_max):
                     ## Add to a list with the Nobel Winners
                     output_Nobel_Winners1.append(person)
                     output_Nobel_Winners_both.append(person)
+                    
                     ## Make a list that has the awards won by every person selected, to check later
                     award_list1.append(person[key1])
                     label_info1+=[[person[key2],person['rdf-schema#label']]]
+                                   
                     won_Nobel = True
         
         ## The same as above, but for a new search_term     
@@ -106,28 +123,15 @@ for year in range(year_min, year_max):
                 
                 ## Add to a new list 
                 output_Nobel_Winners2.append(person)
+                
                 label_info2+=[[person[key2],person['rdf-schema#label']]]
                 if not won_Nobel:
                     output_Nobel_Winners_both.append(person)
-                               
                                
                 ## Add award label
                 if key1 in person:
                     award_list2.append(person[key1])
         
-#        if "Hans Bethe" in person['rdf-schema#label']:
-#            POI_info = []
-#            POI_info += [person]
-#            print(POI_info)
-        
-            
-### Number of persons returned for certain key terms                
-#491 "Nobel Prize"
-#579 "nobel"
-#569 "nobel" but not "ig nobel prize"
-#2510 "nobel" and "prize" 
-#all(x in descr2 for x in ['Nobel', 'Prize'])
-                
 
 #with open('NobelPrize1830-2000.v2.json', 'w') as file:
 #    json.dump(output_Nobel_Winners1, file, indent=4)            
@@ -157,7 +161,7 @@ desired_keys = [
                 '22-rdf-syntax-ns#type_label',
                 'nobel_prize'
                 ]
- 
+## Official Prize Names as found in key-value pair 1 and  
 prize_names = [
                "Nobel Memorial Prize in Economic Sciences", 
                "Nobel Prize in Chemistry", 
@@ -167,6 +171,9 @@ prize_names = [
                "Nobel Prize in Literature"
                ]
 
+not_prize_names = ["Ig Nobel Prize"]
+
+## Prize labels in key-value pair 2
 nobel_22ref_label_names = [
                            "NobelLaureatesInEconomics",
                            "NobelLaureatesInChemistry",
@@ -176,34 +183,30 @@ nobel_22ref_label_names = [
                            "NobelLaureatesInLiterature"                           
                            ]
 
-not_prize_names = ["Ig Nobel Prize"]
-
-
-
 ## Open the output CSV file we want to write to
 with open('NobelPrize1830-2000-NULL-v4.csv', 'w', newline='',encoding='utf-8') as file:
     csvwriter = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
     csvwriter.writerow(desired_keys)
     
+    ## Loop through the dictionaries belonging to eaech Nobel Laureate 
     for person_dictionary in output_Nobel_Winners_both:
         tmp = []
         
         ## Add the value belonging to the key that we want to our tmp list,
         ## if there's no value: "NULL"
-        for entry in desired_keys:
+        for key_entry in desired_keys:
             
             won_prize = False
             
             ## If the column-name is in the dictionary, append the value
-            if entry in person_dictionary:
-                if entry == 'nationality_label':
-                    tmp.append(correctname(person_dictionary[entry]))
-                else: tmp.append(person_dictionary[entry])
+            if key_entry in person_dictionary:
+                if key_entry == 'nationality_label':
+                    tmp.append(correctname(person_dictionary[key_entry]))
+                else: tmp.append(person_dictionary[key_entry])
                     
-
             
             ## When we get to the column-name nobel_prize, add Nobel Prize Name
-            elif entry == 'nobel_prize': # and key1 in person_dictionary:
+            elif key_entry == 'nobel_prize': # and key1 in person_dictionary:
                 
                 ## Look at the award_label column
                 if key1 in person_dictionary:
@@ -270,7 +273,7 @@ for entry in award_list1:
     if count == 0:
         check_if_nobel_prize1.append(entry)
         
-print(check_if_nobel_prize1)
+#print(check_if_nobel_prize1)
    
 
  
@@ -283,10 +286,11 @@ for entry in award_list2:
     if count == 0:
         check_if_nobel_prize2.append(entry)
             
-print(check_if_nobel_prize2)
+#print(check_if_nobel_prize2)
 
 
-## Code below checks if something is in the new way of doing it 
+## Code below checks which new persons are added by using search_term2 (vs search_term1)
+## to see if it outputted Nobel Laureautes and to see the info that belongs to them
 not_in_outNobel1 = []
 not_in_Nobel1_names = []
 for label2 in range(len(label_info2)):
@@ -300,8 +304,7 @@ for label2 in range(len(label_info2)):
         not_in_Nobel1_names.append(label_info2[label2][1])
         
         
-print(not_in_Nobel1_names)
-
+#print(not_in_Nobel1_names)
 
 
 with open('checkout.json', 'w') as file:
